@@ -22,26 +22,23 @@ Node* SequentialSearch(Node* Head, double Target) {
 Node* MoveToFront(Node** Head, double Target) {
 	if (Head == NULL)
 		return NULL;
-	if ((*Head)->Data.score == Target) {
+	if ((*Head)->Data.score == Target)
 		return (*Head);
-	}
 
 	Node* PrevNode = (*Head);
 	Node* TargetNode = (*Head)->NextNode;
 	
 	while (TargetNode != NULL) {
 		if (TargetNode->Data.score == Target) {
-
 			PrevNode->NextNode = TargetNode->NextNode;
 			TargetNode->NextNode = (*Head);
 			(*Head) = TargetNode;
 			
 			return TargetNode;
 		}
-		else {
-			PrevNode = TargetNode;
-			TargetNode = TargetNode->NextNode;
-		}
+
+		PrevNode = TargetNode;
+		TargetNode = TargetNode->NextNode;
 	}
 
 	return NULL;
@@ -78,11 +75,10 @@ Node* Transpose(Node** Head, double Target) {
 
 			return TargetNode;
 		}
-		else {
-			PrevNode2 = PrevNode;
-			PrevNode = TargetNode;
-			TargetNode = TargetNode->NextNode;
-		}
+
+		PrevNode2 = PrevNode;
+		PrevNode = TargetNode;
+		TargetNode = TargetNode->NextNode;
 	}
 
 	return NULL;
@@ -107,36 +103,41 @@ Node* FrequencyMethod(Node** Head, double Target) {
 
 			break;
 		}
-		else {
-			PrevNode = TargetNode;
-			TargetNode = TargetNode->NextNode;
-		}
+
+		PrevNode = TargetNode;
+		TargetNode = TargetNode->NextNode;
 	}
 
 	if (TargetNode != NULL) {		// Frequency값에 맞는 위치에 삽입
 		Node* TempNode = (*Head);
 		PrevNode = NULL;
 
-		while (1) {
+		while (TempNode != NULL) {
 			if (TargetNode->Frequency > TempNode->Frequency) {
 				if (TargetNode == (*Head))
 					return TargetNode;
 
 				if (PrevNode != NULL) {
 					PrevNode->NextNode = TargetNode;
+					TargetNode->NextNode = TempNode;
 				}
 				else {	// TargetNode이 들어갈 위치가 head인 경우 head 변경
 					(*Head) = TargetNode;
+					TargetNode->NextNode = TempNode;
 				}
-				TargetNode->NextNode = TempNode;
 
 				return TargetNode;
 			}
-			else {
-				PrevNode = TempNode;
-				TempNode = TempNode->NextNode;
-			}
+
+			PrevNode = TempNode;
+			TempNode = TempNode->NextNode;
 		}
+
+		// 빈도수가 증가했음에도 제일 낮은경우
+		PrevNode->NextNode = TargetNode;
+		TargetNode->NextNode = NULL;
+
+		return TargetNode;
 	}
 	
 	return NULL;

@@ -105,30 +105,3 @@ int SLL_GetNodeCount(Node* Head)
 
     return Count;
 }
-
-// 리스트 제거
-void SLL_DestoyList(Node* Head) {
-    Node* Current = NULL;
-    int Length = SLL_GetNodeCount(Head);
-
-    for (int i = 0; i < Length; i++)
-    {
-        Current = SLL_GetNodeAt(Head, 0);
-
-        if (Current != NULL)
-        {
-            SLL_RemoveNode(&Head, Current);
-            SLL_DestroyNode(Current);
-        }
-    }
-}
-
-// 리스트 출력
-void PrintList(Node* Head) {    
-    Node* Temp = Head;
-
-    while (Temp != NULL) {
-        printf("%c", Temp->Data);
-        Temp = Temp->NextNode;
-    }
-}
