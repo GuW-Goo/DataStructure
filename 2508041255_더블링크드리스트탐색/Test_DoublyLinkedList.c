@@ -42,14 +42,14 @@ Node* MoveToFront(Node** Head, double Target) {
 			else if (Temp->NextNode == NULL) {	// 꼬리일 경우
 				Temp->PrevNode->NextNode = NULL;	// 리스트에서 Temp 제거
 
+				// 리스트에 값이 2개인 경우
+				if ((*Head)->NextNode == Temp)
+					(*Head)->NextNode = NULL;
+
 				// 헤드노드 변경
 				Temp->NextNode = (*Head);
 				(*Head)->PrevNode = Temp;
 				(*Head) = Temp;
-
-				if ((*Head)->NextNode == Temp) {	// 리스트에 값이 2개일 경우
-					(*Head)->NextNode = NULL;
-				}
 
 				return Temp;
 			}
@@ -83,32 +83,44 @@ Node* Transpose(Node** Head, double Target)
 			if (Temp == (*Head)) {	// Temp가 헤드일 경우
 				return Temp;
 			}
+			else if (Temp->NextNode == NULL) {	// Temp가 꼬리일 경우
+				// 리스트에 값이 2개인지 확인
+				if (Temp->PrevNode == (*Head)) {	// 리스트에 값이 2개인 경우
+					(*Head)->NextNode = NULL;
+					(*Head)->PrevNode = Temp;
+
+					Temp->NextNode = (*Head);
+					Temp->PrevNode = NULL;
+
+					(*Head) = Temp;
+				}
+				else {		// 리스트에 값이 2개보다 많을 경우
+
+					// Temp를 Temp->Prev->Prev(이전이전노드)와 Temp->Prev(이전노드) 사이에 끼워넣기
+					Temp->NextNode = Temp->PrevNode;
+					Temp->PrevNode = Temp->PrevNode->PrevNode;
+
+					// 리스트에 Temp 연결하기
+					Temp->PrevNode->NextNode = Temp;
+					Temp->NextNode->PrevNode = Temp;
+
+					//Temp의 Next노드를 꼬리로 만들기
+					Temp->NextNode->NextNode = NULL;
+				}
+
+				return Temp;
+			}
 			else if (Temp->PrevNode == (*Head)) {	// Temp가 Head 다음 노드일 경우
 				// Head를 Temp와 Temp->Next 사이에 끼워넣기
 				(*Head)->NextNode = Temp->NextNode;
 				(*Head)->PrevNode = Temp;
-				
-				// 리스트의 길이가 2인 경우 오류발생, 예외처리
-				if((*Head)->NextNode != NULL)	
-					(*Head)->NextNode->PrevNode = (*Head);
+
+				(*Head)->NextNode->PrevNode = (*Head);
+				(*Head)->PrevNode->NextNode = (*Head);
 
 				// Temp를 헤드로 만들기
-				Temp->PrevNode = NULL;
 				Temp->NextNode = (*Head);
 				(*Head) = Temp;
-
-				return Temp;
-			}
-			else if (Temp->NextNode == NULL) {	// Temp가 꼬리일 경우
-				// Temp를 Temp->Prev->Prev(이전이전노드)와 Temp->Prev(이전노드) 사이에 끼워넣기
-				Temp->NextNode = Temp->PrevNode;
-				Temp->PrevNode = Temp->PrevNode->PrevNode;
-
-				Temp->PrevNode->NextNode = Temp;
-				Temp->NextNode->PrevNode = Temp;
-
-				//Temp의 Next노드를 꼬리로 만들기
-				Temp->NextNode->NextNode = NULL;
 
 				return Temp;
 			}
@@ -140,8 +152,75 @@ Node* Transpose(Node** Head, double Target)
 //조회수(탐색횟수)에 따른 이동
 Node* FrequencyMethod(Node** Head, double Target)
 {
-	
-	return NULL;
+	Node* TargetNode = (*Head);
+
+	// Target을 찾고 찾은 경우 노드를 뽑아옴
+	while (TargetNode != NULL) {
+		if (TargetNode->Data.score == Target) {
+			TargetNode->Frequency++;   // 빈도수 증가
+
+			if (TargetNode == (*Head)) {   // 찾은 노드가 헤드일 경우. 리스트 변경 없이 return
+				return TargetNode;
+			}
+			else if (TargetNode->NextNode == NULL) {   // 노드가 꼬리일 경우
+				// TargetNode의 이전노드를 꼬리로 만듦
+				TargetNode->PrevNode->NextNode = NULL;
+
+				break;
+			}
+			else {   // 이외의 노드일 경우
+				// TargetNode를 리스트에서 제거
+				TargetNode->PrevNode->NextNode = TargetNode->NextNode;
+				TargetNode->NextNode->PrevNode = TargetNode->PrevNode;
+
+				break;
+			}
+		}
+
+		TargetNode = TargetNode->NextNode;
+	}
+
+	if (TargetNode == NULL)
+		return NULL;
+
+	// Current노드의 Frequency값의 크기에 따라 리스트에 삽입
+	Node* Temp = (*Head);
+
+	while (Temp != NULL) {
+		if (TargetNode->Frequency > Temp->Frequency) {
+			if (Temp == (*Head)) {   // 헤드에 집어넣을 때
+				// 헤드 앞에 TargetNode를 연결
+				(*Head)->PrevNode = TargetNode;
+
+				// 헤드 변경
+				TargetNode->NextNode = (*Head);
+				TargetNode->PrevNode = NULL;
+				(*Head) = TargetNode;
+
+				return TargetNode;
+			}
+			else {   // 그 외
+				// Temp와 Temp->Prev 사이에 TargetNode를 끼워넣음
+				TargetNode->PrevNode = Temp->PrevNode;
+				TargetNode->NextNode = Temp;
+
+				TargetNode->PrevNode->NextNode = TargetNode;
+				TargetNode->NextNode->PrevNode = TargetNode;
+
+				return TargetNode;			
+			}
+		}
+		
+		if (Temp->NextNode == NULL) {	// 빈도수가 증가했음에도 빈도수가 제일 낮은 경우
+			Temp->NextNode = TargetNode;
+			TargetNode->PrevNode = Temp;
+			TargetNode->NextNode = NULL;
+
+			return TargetNode;
+		}
+
+		Temp = Temp->NextNode;
+	}
 }
 
 
